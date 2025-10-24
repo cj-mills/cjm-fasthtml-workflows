@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "cjm-fasthtml-workflows"
+  site-url: "https://cj-mills.github.io/cjm-fasthtml-workflows"
+  description: "Session-based workflow management for FastHTML applications with multi-step state tracking, job metadata storage, and operation deduplication."
+  repo-branch: main
+  repo-url: "https://github.com/cj-mills/cjm-fasthtml-workflows"
