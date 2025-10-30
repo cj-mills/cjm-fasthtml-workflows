@@ -29,8 +29,8 @@ graph LR
     core_job_session[core.job_session<br/>JobSessionManager]
     core_workflow_session[core.workflow_session<br/>WorkflowSession]
 
-    core_helpers --> core_job_session
     core_helpers --> core_deduplication
+    core_helpers --> core_job_session
 ```
 
 *2 cross-module dependencies detected*

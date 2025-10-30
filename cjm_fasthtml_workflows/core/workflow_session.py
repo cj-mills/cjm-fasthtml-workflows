@@ -28,6 +28,13 @@ class WorkflowSession:
     ) -> str: # Namespaced session key
         """Create namespaced session key."""
         return f"{self._prefix}{key}"
+    
+    def _force_session_save(self) -> None:
+        """Force session to be marked as modified and saved."""
+        import time
+        # Update a timestamp to trigger session modification detection
+        # This ensures session middleware knows to save the session
+        self.sess[f"__{self.workflow_id}_last_modified"] = time.time()
 
     def set(
         self, 
@@ -36,10 +43,9 @@ class WorkflowSession:
     ) -> None:
         """Store value in workflow session."""
         self.sess[self._make_key(key)] = value
-        # Force session modification detection by triggering __setitem__ on the session itself
+        # Force session modification detection by updating a timestamp
         # This ensures Starlette's session middleware persists the changes
-        if hasattr(self.sess, '_modified'):
-            self.sess._modified = True
+        self._force_session_save()
 
     def get(
         self, 
@@ -58,8 +64,7 @@ class WorkflowSession:
         if full_key in self.sess:
             del self.sess[full_key]
             # Force session modification detection
-            if hasattr(self.sess, '_modified'):
-                self.sess._modified = True
+            self._force_session_save()
 
     def clear(self) -> None:
         """Clear all data for this workflow from session."""
@@ -67,8 +72,7 @@ class WorkflowSession:
         for key in keys_to_delete:
             del self.sess[key]
         # Force session modification detection
-        if hasattr(self.sess, '_modified'):
-            self.sess._modified = True
+        self._force_session_save()
 
     def get_all(self) -> Dict[str, Any]: # Dictionary mapping original keys to their values
         """Get all workflow data as a dictionary with original (unprefixed) keys."""
