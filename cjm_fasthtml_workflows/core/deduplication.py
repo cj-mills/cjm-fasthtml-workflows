@@ -27,6 +27,13 @@ class DeduplicationTracker:
         # Session stores as list, we convert to set for O(1) lookup
         processed_list = self.sess.get(self._key, [])
         return set(processed_list)
+    
+    def _force_session_save(self) -> None:
+        """Force session to be marked as modified and saved."""
+        import time
+        # Update a timestamp to trigger session modification detection
+        # This ensures session middleware knows to save the session
+        self.sess[f"__dedup_{self.tracker_id}_last_modified"] = time.time()
 
     def _save_processed_set(
         self, 
@@ -35,6 +42,8 @@ class DeduplicationTracker:
         """Save the set of processed job IDs to session."""
         # Convert set to list for JSON serialization
         self.sess[self._key] = list(processed)
+        # Force session modification detection
+        self._force_session_save()
 
     def is_processed(
         self, 
@@ -65,6 +74,8 @@ class DeduplicationTracker:
         """Clear all processed job IDs."""
         if self._key in self.sess:
             del self.sess[self._key]
+        # Force session save after deletion
+        self._force_session_save()
 
     def get_all_processed(self) -> Set[str]: # Set of job IDs that have been marked as processed
         """Get all processed job IDs."""
